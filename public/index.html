@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>家庭点菜</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./theme.css" />
+
+  <style>
+    /* =========================
+       Splash Cover（封面）
+       ========================= */
+    #splash{
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background:
+        radial-gradient(900px 420px at 20% 0%, rgba(210,147,95,.16), transparent 60%),
+        radial-gradient(900px 420px at 85% 10%, rgba(122,143,98,.14), transparent 55%),
+        linear-gradient(180deg, #f7efe3, #f2f6ef);
+    }
+    #splash.hidden{ display:none; }
+    #splash.fade-out{ animation: splashOut .25s ease both; }
+    @keyframes splashOut{ from{opacity:1} to{opacity:0} }
+
+    #splashCard{
+      width: min(520px, 92vw);
+      background: rgba(255,251,245,.92);
+      border: 1px solid rgba(122,143,98,.12);
+      border-radius: 24px;
+      box-shadow: 0 24px 60px rgba(74,61,41,.12);
+      overflow: hidden;
+      text-align: center;
+      position: relative;
+    }
+
+    /* 封面图区域：按钮放中间 */
+    /* 封面图区域：按钮放上方，不遮挡图片 */
+  .splash-hero{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px 14px 0;
+  }
+
+  /* 按钮嵌在图片里：放到底部居中，不挡头 */
+  /* 按钮嵌在图片里：放在公仔头上方，且更小 */
+#enterBtn{
+  position: absolute;
+  left: 50%;
+  top: 84px;                    /* 👈 往下/往上调：10~28 */
+  transform: translateX(-50%);  /* 只水平居中 */
+
+  border: 0;
+  border-radius: 999px;
+  padding: 25px 30px;            /* ✅ 更小 */
+  min-width: 0;                 /* ✅ 不强制变大 */
+  cursor: pointer;
+
+  background: rgba(85, 107, 78, .92);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+
+  color: #fff;
+  font-weight: 800;
+  font-size: 14px;              /* ✅ 更小字号 */
+  letter-spacing: .2px;
+
+  box-shadow: 0 16px 28px rgba(74,61,41,.16);
+}
+
+#enterBtn:hover{ filter: brightness(1.03); }
+#enterBtn:active{ transform: translateX(-50%) scale(0.98); }
+
+
+
+  #splashImg{
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+
+    #splashTitle{
+      font-size: 20px;
+      font-weight: 900;
+      padding: 12px 14px 4px;
+      color: #243127;
+    }
+    #splashSub{
+      font-size: 13px;
+      color: #667467;
+      padding-bottom: 14px;
+    }
+
+    /* 主页面容器：进入后再显示 */
+    #app.hidden{ display:none; }
+    #app.fade-in{ animation: appFade .25s ease both; }
+    @keyframes appFade{
+      from{ opacity: 0; transform: translateY(6px); }
+      to{ opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===== Summary Bar（保持 id 版） ===== */
+    #summaryBar.hidden { display: none; }
+    #summaryBar{
+      position: sticky;
+      bottom: 12px;
+      z-index: 30;
+      margin-top: 14px;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+
+      background: #111827;
+      color: #fff;
+      border-radius: 14px;
+      padding: 12px 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.18);
+    }
+    #summaryBar .left{
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    #summaryBar .nums{
+      display: flex;
+      gap: 10px;
+      font-size: 12px;
+      color: rgba(255,255,255,.85);
+      flex-wrap: wrap;
+    }
+    #summaryBar .nums b{ color:#fff; }
+    #summaryBar .sumText{
+      font-size: 13px;
+      color: rgba(255,255,255,.9);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 520px;
+    }
+
+    #summaryBar .right{
+      display:flex;
+      gap:10px;
+      flex-shrink: 0;
+      align-items: center;
+    }
+    #summaryBar .btn-light{
+      border:0;
+      border-radius: 12px;
+      padding: 10px 12px;
+      cursor: pointer;
+      background: #2563eb;
+      color: #fff;
+      font-weight: 800;
+      min-width: 110px;
+    }
+    #summaryBar .btn-ghost{
+      border:0;
+      border-radius: 12px;
+      padding: 10px 12px;
+      cursor: pointer;
+      background: rgba(255,255,255,.14);
+      color: #fff;
+      font-weight: 700;
+      min-width: 110px;
+    }
+
+    /* ===== Chosen Panel（保持不变） ===== */
+    #chosenPanel.hidden { display: none; }
+    #chosenPanel{
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      background: rgba(0,0,0,.35);
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      padding: 14px;
+    }
+    #chosenPanel .sheet{
+      width: 100%;
+      max-width: 860px;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+      overflow: hidden;
+      max-height: 75vh;
+      display: flex;
+      flex-direction: column;
+    }
+    #chosenPanel .sheet-header{
+      display:flex;
+      justify-content: space-between;
+      align-items:center;
+      padding: 12px 14px;
+      border-bottom: 1px solid #eee;
+      background: #f8fafc;
+    }
+    #chosenPanel .sheet-header b{ font-size: 15px; }
+    #chosenPanel .sheet-body{
+      padding: 10px 14px;
+      overflow: auto;
+    }
+    .chosen-row{
+      display:flex;
+      justify-content: space-between;
+      align-items:center;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px dashed #eee;
+    }
+    .chosen-name{
+      font-weight: 800;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .chosen-actions{
+      display:flex;
+      align-items:center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    #chosenPanel .sheet-footer{
+      padding: 12px 14px;
+      border-top: 1px solid #eee;
+      background: #fff;
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    #chosenPanel .sheet-footer button{ min-width: 120px; }
+  </style>
+</head>
+
+<body>
+  <!-- ===== 封面 Splash ===== -->
+  <div id="splash">
+    <div id="splashCard">
+      <div class="splash-hero">
+        <button id="enterBtn" type="button">公主请点菜</button>
+        <img id="splashImg" src="./order-cover.png" alt="封面" />
+      </div>      
+      <div id="splashTitle">家庭点菜 💗</div>
+      <div id="splashSub">点一下进入点菜页面</div>
+    </div>
+  </div>
+
+  <!-- ===== 点菜页面 App ===== -->
+  <div id="app" class="hidden">
+    <div class="container">
+      <div class="card">
+        <h1>家庭点菜 🍽️</h1>
+        <small class="muted">选好后提交，厨房端会看到最新订单。</small>
+      </div>
+
+      <div class="card">
+        <div class="row">
+          <div style="flex:1; min-width:220px;">
+            <small class="muted">你是谁</small>
+            <input id="who" type="text" placeholder="例如：小美 / 宝宝" />
+          </div>
+        </div>
+
+        <hr />
+
+        <div class="row" style="align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+          <div style="flex:1; min-width:220px;">
+            <small class="muted">搜索菜名</small>
+            <input id="q" type="text" placeholder="例如：鸡 / 汤 / 辣..." />
+          </div>
+
+          <div style="min-width:220px;">
+            <small class="muted">排序</small>
+            <select id="sort" class="ghost" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid #e5e7eb;">
+              <option value="DEFAULT">默认</option>
+              <option value="FREQ">常点优先</option>
+              <option value="NAME">按名字</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="tagBar" style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;"></div>
+
+        <div id="menu"></div>
+
+        <hr />
+
+        <small class="muted">备注（可选）</small>
+        <textarea id="note" placeholder="例如：少辣、不要香菜、想喝汤…"></textarea>
+
+        <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;">
+          <button id="submit" style="min-width:120px;">提交订单</button>
+          <button id="clear" class="ghost" style="min-width:110px;">清空选择</button>
+        </div>
+
+        <div id="msg" style="margin-top:10px;"></div>
+
+        <div id="summaryBar" class="hidden">
+          <div class="left">
+            <div class="nums">
+              已选 <b id="sumKinds">0</b> 种 · 共 <b id="sumQty">0</b> 份
+            </div>
+            <div class="sumText" id="sumText">暂无选择</div>
+          </div>
+          <div class="right">
+            <button class="btn-ghost" id="toggleChosen">查看已选</button>
+            <button class="btn-light" id="submit3">提交订单</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="chosenPanel" class="hidden">
+      <div class="sheet">
+        <div class="sheet-header">
+          <b>已选清单</b>
+          <button class="ghost" id="closeChosen" style="padding:8px 12px;">关闭</button>
+        </div>
+        <div class="sheet-body">
+          <div id="chosenList"></div>
+        </div>
+        <div class="sheet-footer">
+          <button id="clear2" class="ghost">清空选择</button>
+          <button id="submit2">提交订单</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ 所有脚本都放 body 最底部（关键） -->
+  <script src="./order.js"></script>
+
+  <script>
+    // bridge: submit2/submit3/clear2 复用主按钮
+    document.getElementById("submit2")?.addEventListener("click", () => document.getElementById("submit")?.click());
+    document.getElementById("submit3")?.addEventListener("click", () => document.getElementById("submit")?.click());
+    document.getElementById("clear2")?.addEventListener("click", () => document.getElementById("clear")?.click());
+
+    document.getElementById("chosenPanel")?.addEventListener("click", (e) => {
+      if (e.target && e.target.id === "chosenPanel") {
+        document.getElementById("closeChosen")?.click();
+      }
+    });
+
+    // Splash 进入逻辑：✅ 每次刷新都显示封面（不使用 localStorage）
+  
+</script>
+
+</body>
+</html>

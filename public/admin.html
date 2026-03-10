@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>厨房端</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./theme.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>厨房端 👨‍🍳</h1>
+      <small class="muted">输入口令后自动刷新显示最新订单。</small>
+    </div>
+
+    <div class="card">
+      <small class="muted">管理员口令</small>
+      <div class="row">
+        <div style="flex:1; min-width:220px;">
+          <input id="key" type="password" placeholder="在 server.js 里设置的 ADMIN_KEY" />
+        </div>
+        <button id="save" class="secondary">保存</button>
+        <button id="enableAlert" class="ghost">启用提醒</button>
+        <button id="testAlert" class="ghost">测试铃声</button>
+      </div>
+      <div id="status" style="margin-top:10px;"></div>
+      <div id="alertHint" class="muted" style="margin-top:6px; font-size:12px;"></div>      
+    </div>
+
+    <div class="card">
+      <h1 style="font-size:18px;">最新订单</h1>
+      <div id="latest" class="muted">暂无</div>
+      <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+        <button id="refresh" class="ghost">手动刷新订单</button>
+        <button id="toggleAuto" class="ghost">暂停自动刷新</button>
+<span id="autoState" class="muted" style="font-size:12px; align-self:center;"></span>
+        <button id="reloadMenu" class="ghost">Reload 菜单</button>
+        <button id="cooking" class="ghost">开始做</button>
+        <button id="done">标记完成</button>
+        <button id="clearDone" class="ghost">清空已完成</button>
+        <button id="deleteLatest" class="ghost">删除该单</button>
+      </div>
+      
+
+      <div class="section">
+        <div class="row" style="justify-content:space-between; align-items:center; gap:12px;">
+          <h3 style="margin:0;">订单队列（最近20条）</h3>
+      
+          <!-- 你原来的筛选下拉也可以保留 -->
+          <select id="filterStatus" class="ghost">
+            <option value="ALL">全部</option>
+            <option value="NEW">只看 NEW</option>
+            <option value="COOKING">只看 COOKING</option>
+            <option value="DONE">只看 DONE</option>
+          </select>
+        </div>
+        <div class="toolbar">
+          <button class="ghost" id="filterAll">全部</button>
+          <button class="ghost" id="filterNew">只看 NEW</button>
+          <button class="ghost" id="filterCooking">只看 COOKING</button>
+        
+          <button class="ghost" id="toggleDone" style="margin-left:auto;">隐藏 DONE</button>
+        </div>
+        
+      
+        <!-- 三栏看板 -->
+        <div id="list" class="board">
+          <div class="col" id="newCol">
+            <div class="col-title">NEW <span id="cntNew" class="muted"></span></div>
+            <div id="colNew" class="col-body">加载中...</div>
+          </div>
+        
+          <div class="col" id="cookingCol">
+            <div class="col-title">COOKING <span id="cntCooking" class="muted"></span></div>
+            <div id="colCooking" class="col-body">加载中...</div>
+          </div>
+        
+          <div class="col" id="doneCol">
+            <div class="col-title">DONE <span id="cntDone" class="muted"></span></div>
+            <div id="colDone" class="col-body">加载中...</div>
+          </div>          
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="./admin.js"></script>
+</body>
+</html>

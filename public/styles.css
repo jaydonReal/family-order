@@ -1,0 +1,784 @@
+/* =========================
+   styles.css (FULL REPLACE)
+   Works for:
+   - order.html (点菜端)
+   - admin.html (厨房端)
+   ========================= */
+
+/* ===== Base ===== */
+* { box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", Arial;
+  margin: 0;
+  background: #f6f7fb;
+  color: #111827;
+}
+.container { max-width: min(1180px, 96vw); margin: 0 auto; padding: 20px; }
+
+.card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.06);
+  margin-bottom: 14px;
+}
+
+h1 { margin: 0 0 10px; font-size: 22px; }
+small { color:#666; }
+hr { border:0; border-top:1px solid #eee; margin: 12px 0; }
+
+.row { display:flex; gap:12px; flex-wrap: wrap; }
+
+/* ===== Inputs ===== */
+input[type="text"], textarea, input[type="password"], select{
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  outline: none;
+  background: #fff;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+textarea { min-height: 80px; resize: vertical; }
+
+input:focus, textarea:focus, select:focus{
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, .18);
+}
+
+/* ===== Buttons (global) ===== */
+button{
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 14px;
+  cursor: pointer;
+  background:#2563eb;
+  color:#fff;
+  font-weight: 700;
+  transition: transform .06s ease, filter .12s ease, box-shadow .12s ease;
+}
+button:hover{ filter: brightness(1.02); }
+button:active{ transform: scale(0.99); }
+
+button.secondary { background:#111827; }
+button.ghost { background:#e5e7eb; color:#111827; }
+button:disabled { opacity: .6; cursor: not-allowed; }
+
+/* ===== Text helpers ===== */
+.muted { color:#6b7280; }
+
+/* ===== Status ===== */
+.status-new { color:#dc2626; font-weight:800; }
+.status-done { color:#16a34a; font-weight:800; }
+.status-cooking { color:#f59e0b; font-weight:800; }
+
+/* ===== Badges (global) ===== */
+.badge {
+  display:inline-flex;
+  align-items:center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(37,99,235,.06);
+  color:#1d4ed8;
+  border: 1px solid rgba(37,99,235,.18);
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+  writing-mode: horizontal-tb !important;
+}
+.badge.hot{
+  background: rgba(14,116,144,.08);
+  color:#0e7490;
+  border: 1px solid rgba(14,116,144,.18);
+}
+
+/* =====================================================
+   Admin (厨房端) - Kanban board (3 columns)
+   ===================================================== */
+.board{
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap:12px;
+  margin-top:10px;
+  width:100%;
+  max-width:100%;
+}
+
+.col{
+  background:#f8fafc;
+  border:1px solid #e5e7eb;
+  border-radius:14px;
+  padding:10px;
+  min-height:120px;
+  min-width:0;
+}
+
+.col-title{
+  font-weight:800;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.col-body{ min-width:0; }
+
+/* small screen: stack columns */
+@media (max-width: 900px){
+  .board{ grid-template-columns: 1fr; }
+}
+
+/* Kanban card layout (2-column card) */
+.col-body .item{
+  background:white;
+  border:1px solid #eef2f7;
+  border-radius:12px;
+  padding:12px;
+  margin-bottom:10px;
+
+  display:grid;
+  grid-template-columns: minmax(0, 1fr) 96px;
+  gap:12px;
+  align-items:start;
+
+  min-width:0;
+  overflow:hidden;
+}
+
+.order-meta{ grid-column: 1; min-width:0; }
+.order-body{ grid-column: 1; min-width:0; }
+
+.actions{
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  justify-self:end;
+  align-self:start;
+}
+.actions .ghost{
+  width:100%;
+  padding:10px 0;
+  border-radius:12px;
+}
+
+.order-meta .idline{
+  display:flex;
+  align-items:baseline;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.order-meta .oid{ font-size:18px; font-weight:900; }
+.order-meta .statusTag{ font-weight:900; }
+.order-meta .sub{
+  margin-top:6px;
+  font-size:12px;
+  color:#6b7280;
+  line-height:1.35;
+}
+
+.order-body .badges{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:10px;
+}
+
+.note{
+  margin-top:10px;
+  width:100%;
+  font-size:12px;
+  padding:8px 10px;
+  border-radius:10px;
+  border:1px dashed #e5e7eb;
+  background:#fff7ed;
+  color:#7c2d12;
+  line-height:1.35;
+}
+.note.muted{
+  background:transparent;
+  border:1px solid #eef2f7;
+  color:#6b7280;
+}
+
+@media (max-width: 900px){
+  .col-body .item{ grid-template-columns: 1fr; }
+  .actions{
+    grid-column: 1;
+    grid-row: auto;
+    flex-direction:row;
+    flex-wrap:wrap;
+    justify-self:start;
+  }
+  .actions .ghost{
+    width:auto;
+    flex:1;
+    padding:10px 12px;
+  }
+}
+
+.toolbar{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+  margin: 10px 0 12px;
+}
+.toolbar .ghost.active{
+  background:#111827;
+  color:#fff;
+}
+
+/* DONE 折叠：隐藏 doneCol + board 自动变 2 列 */
+#list.done-collapsed{
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+#list.done-collapsed #doneCol{ display:none; }
+
+/* =====================================================
+   Order (点菜端) - Search/Sort/TagBar
+   ===================================================== */
+#tagBar{
+  margin-top:10px;
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+#tagBar .tagbtn{
+  border: 1px solid #e5e7eb;
+  background: #f3f4f6;
+  color: #111827;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform .08s ease, background .15s ease, box-shadow .15s ease;
+}
+#tagBar .tagbtn:hover{
+  background:#e5e7eb;
+  transform: translateY(-1px);
+}
+
+/* 你 JS 里会 inline 设置选中 tag 的背景为 #111827 */
+#tagBar .tagbtn[style*="background: #111827"]{
+  border-color:#111827 !important;
+  box-shadow: 0 10px 18px rgba(17, 24, 39, .18);
+}
+
+/* select arrow */
+#sort{
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #6b7280 50%),
+    linear-gradient(135deg, #6b7280 50%, transparent 50%),
+    linear-gradient(to right, transparent, transparent);
+  background-position:
+    calc(100% - 18px) 18px,
+    calc(100% - 12px) 18px,
+    calc(100% - 2.4rem) 0.5rem;
+  background-size:
+    6px 6px,
+    6px 6px,
+    1px 1.8rem;
+  background-repeat: no-repeat;
+  padding-right: 40px;
+}
+
+/* =====================================================
+   Order (点菜端) - Menu Cards + Stepper
+   ===================================================== */
+#menu{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+/* 菜品卡片 */
+#menu .item{
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 12px 12px;
+  background: #fff;
+  box-shadow: 0 6px 18px rgba(17,24,39,.06);
+  transition: transform .08s ease, box-shadow .12s ease, border-color .12s ease;
+}
+
+#menu .item:hover{
+  transform: translateY(-1px);
+  border-color: #dbeafe;
+  box-shadow: 0 10px 26px rgba(37,99,235,.10);
+}
+
+/* 选中态：你 JS 可加 .selected（qty>0） */
+#menu .item.selected{
+  border-color: #93c5fd;
+  box-shadow: 0 10px 26px rgba(37,99,235,.12);
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+}
+
+/* qty 数字块 */
+#menu .item .qty{
+  min-width: 28px !important;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  font-weight: 900;
+  color: #111827;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ====== FIX: +/- 按钮不可见 / 不居中（最终版） ======
+   你的 +/- 是 button.ghost + data-action
+   全局 button 有 padding + 蓝底，这里必须强行覆盖 */
+#menu button[data-action],
+#chosenList button[data-action]{
+  width: 34px;
+  height: 34px;
+  padding: 0 !important;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 999px !important;
+  border: 1px solid #e5e7eb !important;
+  background: #ffffff !important;
+
+  color: #111827 !important;
+  font-size: 18px !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+
+  box-shadow: 0 2px 10px rgba(0,0,0,.06);
+  transform: none !important;           /* 取消你之前的 translateY(-1px) */
+}
+
+/* hover/active 更像控件 */
+#menu button[data-action]:hover,
+#chosenList button[data-action]:hover{
+  background:#f3f4f6 !important;
+}
+#menu button[data-action]:active,
+#chosenList button[data-action]:active{
+  transform: scale(.98) !important;
+}
+#menu button[data-action]:disabled,
+#chosenList button[data-action]:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+  box-shadow:none;
+}
+
+/* 若你在 HTML 里用了 stepper 容器（可选） */
+#menu .stepper{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #f3f4f6;
+  border-radius: 999px;
+  padding: 6px 8px;
+}
+#menu .stepper .qty{
+  min-width: 28px;
+  text-align:center;
+  font-weight: 900;
+}
+
+/* 手机上更舒服 */
+@media (max-width: 480px){
+  #menu .item{ padding: 12px 10px; }
+  #menu .item .qty{ min-width: 30px !important; }
+}
+
+/* =====================================================
+   Summary Bar (点菜端底部汇总)
+   ===================================================== */
+   #summaryBar{
+    position: sticky;
+    bottom: 12px;
+    z-index: 20;
+    margin-top: 14px;
+  
+    display:flex;
+    gap:12px;
+    align-items:center;
+    justify-content:space-between;
+  
+    padding: 12px 14px;
+    border-radius: 14px;
+    background:#ffffff;
+    border:1px solid #e5e7eb;
+    box-shadow: 0 10px 30px rgba(0,0,0,.10);
+  }
+  
+  #summaryBar.hidden{ display:none; }
+  
+  #summaryBar .left{ min-width:0; }
+  
+  #summaryBar .nums{
+    display:flex;
+    gap:10px;
+    font-size:12px;
+    color:#6b7280;
+    flex-wrap:wrap;
+  }
+  #summaryBar .nums b{ color:#111827; }
+  
+  #summaryBar .sumText{
+    font-size:12px;
+    margin-top:4px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    max-width:520px;
+  }
+  
+  #summaryBar .right{
+    display:flex;
+    gap:10px;
+    flex-shrink:0;
+    align-items:center;
+  }
+  
+  /* Mobile: 固定在底部 */
+  @media (max-width: 900px){
+    #summaryBar{
+      position: fixed;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      margin-top:0;
+    }
+    body{ padding-bottom: 86px; }
+    #summaryBar .sumText{ max-width: 46vw; }
+  }
+  
+
+/* =====================================================
+   Chosen Panel (点菜端已选清单弹窗)
+   ===================================================== */
+.chosen-panel{
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(17,24,39,.40);
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  padding: 12px;
+}
+.chosen-panel.hidden{ display:none; }
+
+.chosen-card{
+  width: 100%;
+  max-width: 860px;
+  background:#fff;
+  border-radius: 18px;
+  padding: 14px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.25);
+}
+
+.chosen-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.chosen-list{
+  max-height: 45vh;
+  overflow:auto;
+  padding: 10px 0;
+}
+
+.chosen-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  padding: 10px 0;
+  border-bottom: 1px dashed #eee;
+}
+.chosen-row:last-child{ border-bottom:none; }
+
+.chosen-name{
+  font-weight:800;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.chosen-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-shrink:0;
+}
+
+.chosen-foot{
+  display:flex;
+  gap:10px;
+  justify-content:flex-end;
+  padding-top: 10px;
+  border-top: 1px solid #eee;
+}
+
+/* =====================================================
+   Extra: Item polish (generic)
+   ===================================================== */
+.item:active{ transform: scale(0.99); }
+.item:hover{ box-shadow: 0 8px 22px rgba(0,0,0,.06); }
+
+/* =========================
+   Princess Pink Theme (override)
+   粘贴到 styles.css 最末尾
+========================= */
+
+:root{
+  --bg1:#fff0f7;
+  --bg2:#f6f7ff;
+  --card:#ffffff;
+  --text:#1f2937;
+  --muted:#6b7280;
+
+  --p1:#ff4fa3;   /* 主粉 */
+  --p2:#ff86c8;   /* 浅粉 */
+  --p3:#ffd1e8;   /* 更浅粉 */
+  --lav:#c7b6ff;  /* 淡紫 */
+  --line: rgba(255,79,163,.20);
+
+  --shadow: 0 12px 30px rgba(255,79,163,.12);
+  --shadow2: 0 8px 22px rgba(17,24,39,.06);
+}
+
+body{
+  background:
+    radial-gradient(900px 380px at 18% -10%, rgba(255,79,163,.18), transparent 60%),
+    radial-gradient(900px 420px at 85% 10%, rgba(199,182,255,.22), transparent 55%),
+    linear-gradient(180deg, var(--bg1), var(--bg2));
+  color: var(--text);
+}
+
+/* 卡片更“软萌” */
+.card{
+  border: 1px solid rgba(255,79,163,.10);
+  box-shadow: var(--shadow2);
+}
+
+/* 标题带一点公主感 */
+h1{
+  letter-spacing: .2px;
+}
+small, .muted{ color: var(--muted); }
+
+/* 输入框：粉色 focus */
+input[type="text"], textarea, input[type="password"], select{
+  border: 1px solid rgba(255,79,163,.18) !important;
+  background: rgba(255,255,255,.92);
+}
+input[type="text"]:focus, textarea:focus, select:focus{
+  border-color: var(--p1) !important;
+  box-shadow: 0 0 0 4px rgba(255,79,163,.18) !important;
+}
+
+/* 全局按钮：改成粉色渐变 */
+button{
+  background: linear-gradient(180deg, var(--p2), var(--p1)) !important;
+  color: #fff !important;
+  box-shadow: 0 10px 18px rgba(255,79,163,.18);
+}
+button:hover{
+  filter: brightness(1.02);
+  transform: translateY(-1px);
+}
+button:active{ transform: translateY(0); }
+
+/* ghost 按钮：奶油粉 */
+button.ghost{
+  background: rgba(255,79,163,.10) !important;
+  color: #7a1f4a !important;
+  box-shadow: none !important;
+  border: 1px solid rgba(255,79,163,.18) !important;
+}
+button.ghost:hover{
+  background: rgba(255,79,163,.16) !important;
+}
+
+/* badge：粉紫糖果 */
+.badge{
+  background: rgba(255,79,163,.10) !important;
+  color: #8a1f57 !important;
+  border: 1px solid rgba(255,79,163,.22) !important;
+}
+.badge.hot{
+  background: rgba(199,182,255,.18) !important;
+  color: #4c1d95 !important;
+  border-color: rgba(199,182,255,.28) !important;
+}
+
+/* TagBar：选中态更明显（不依赖 inline style） */
+#tagBar .tagbtn{
+  background: rgba(255,79,163,.10) !important;
+  border: 1px solid rgba(255,79,163,.18) !important;
+  color:#7a1f4a !important;
+}
+#tagBar .tagbtn:hover{
+  background: rgba(255,79,163,.16) !important;
+}
+#tagBar .tagbtn.active{
+  background: linear-gradient(180deg, var(--p2), var(--p1)) !important;
+  color:#fff !important;
+  border-color: rgba(255,79,163,.35) !important;
+  box-shadow: var(--shadow);
+}
+
+/* 菜单 item：选中高亮（qty>0 时你 JS 可以加 .selected） */
+#menu .item{
+  border: 1px solid rgba(255,79,163,.14) !important;
+  box-shadow: var(--shadow2) !important;
+}
+#menu .item:hover{
+  border-color: rgba(255,79,163,.30) !important;
+  box-shadow: var(--shadow) !important;
+}
+#menu .item.selected{
+  background: linear-gradient(180deg, rgba(255,255,255,1), rgba(255,79,163,.06)) !important;
+  border-color: rgba(255,79,163,.40) !important;
+}
+
+/* stepper 的 +/-：粉色描边更像“公主按钮” */
+#menu button[data-action],
+#chosenList button[data-action]{
+  border: 1px solid rgba(255,79,163,.25) !important;
+  background: #fff !important;
+  color: #7a1f4a !important;
+  box-shadow: 0 4px 10px rgba(255,79,163,.10);
+}
+
+/* ===== summaryBar（你选 id 版）===== */
+#summaryBar.hidden{ display:none; }
+
+#summaryBar{
+  border: 1px solid rgba(255,255,255,.35);
+  background:
+    radial-gradient(420px 240px at 18% 10%, rgba(255,255,255,.26), transparent 60%),
+    linear-gradient(90deg, rgba(255,79,163,.95), rgba(199,182,255,.92));
+  box-shadow: 0 16px 34px rgba(255,79,163,.20);
+}
+
+#summaryBar .btn-light{
+  background: #fff !important;
+  color: #7a1f4a !important;
+  box-shadow: 0 12px 20px rgba(0,0,0,.10);
+}
+#summaryBar .btn-ghost{
+  background: rgba(255,255,255,.20) !important;
+  color:#fff !important;
+  border: 1px solid rgba(255,255,255,.28);
+}
+
+/* ===== Splash Cover ===== */
+/* =========================
+   Splash Cover（封面）
+   每次刷新都显示（不做本地记忆）
+========================= */
+#splash{
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background:
+    radial-gradient(900px 420px at 20% 0%, rgba(255,79,163,.20), transparent 60%),
+    radial-gradient(900px 420px at 85% 10%, rgba(199,182,255,.22), transparent 55%),
+    linear-gradient(180deg, #fff0f7, #f6f7ff);
+}
+#splash.hidden{ display:none; }
+#splash.fade-out{ animation: splashOut .25s ease both; }
+@keyframes splashOut{ from{opacity:1} to{opacity:0} }
+
+#splashCard{
+  width: min(520px, 92vw);
+  background: rgba(255,255,255,.92);
+  border: 1px solid rgba(255,79,163,.14);
+  border-radius: 18px;
+  box-shadow: 0 20px 60px rgba(255,79,163,.14);
+  overflow: hidden;
+  text-align: center;
+}
+
+.splash-hero{
+  position: relative;
+}
+
+#splashImg{
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ✅ 按钮在图片正中间 */
+#enterBtn{
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+
+  border: 0;
+  border-radius: 999px;
+  padding: 14px 18px;
+  min-width: 190px;
+  cursor: pointer;
+
+  background: linear-gradient(180deg, #ffb4dd, #ff4fa3);
+  color: #fff;
+  font-weight: 900;
+  font-size: 16px;
+
+  box-shadow: 0 18px 36px rgba(255,79,163,.28);
+  backdrop-filter: blur(6px);
+}
+#enterBtn:hover{ filter: brightness(1.03); }
+#enterBtn:active{ transform: translate(-50%, -50%) scale(0.99); }
+
+/* 标题区 */
+#splashTitle{
+  font-size: 18px;
+  font-weight: 900;
+  padding: 12px 14px 4px;
+  color: #1f2937;
+}
+#splashSub{
+  font-size: 13px;
+  color: #6b7280;
+  padding-bottom: 14px;
+}
+
+/* 主页面容器：进入后再显示 */
+#app.hidden{ display:none; }
+#app.fade-in{ animation: appFade .25s ease both; }
+@keyframes appFade{
+  from{ opacity: 0; transform: translateY(6px); }
+  to{ opacity: 1; transform: translateY(0); }
+}
+
+/* Splash fade out */
+.splash.fade-out{
+  animation: splashOut .25s ease both;
+}
+@keyframes splashOut{
+  from{ opacity: 1; }
+  to{ opacity: 0; }
+}
