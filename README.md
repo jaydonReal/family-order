@@ -21,6 +21,8 @@ npm run dev
 
 - `PORT`：部署平台分配的端口
 - `ADMIN_KEY`：厨房端口令
+- `TURSO_DATABASE_URL`：线上 Turso 数据库地址
+- `TURSO_AUTH_TOKEN`：Turso 访问令牌
 
 ## 免费部署建议
 
@@ -30,9 +32,22 @@ npm run dev
 
 1. 代码托管到 GitHub
 2. 部署到 Render 的免费 Web Service
+3. 数据库存到 Turso 免费版
 
 注意：
 
-- 当前订单数据默认保存在本地 `family.db`
-- 免费云部署环境通常是临时磁盘，服务重启后订单数据可能丢失
-- 如果你后面需要“数据长期保存”，可以再把数据库切到免费的 Supabase 或 Turso
+- 本地开发默认还是使用 `family.db`
+- 只要配置了 `TURSO_DATABASE_URL` 和 `TURSO_AUTH_TOKEN`，服务就会自动切到 Turso
+- 免费云部署环境本地磁盘通常不持久，所以线上建议一定要配 Turso
+
+## 推荐部署结构
+
+- GitHub：放代码
+- Render：放网站
+- Turso：存订单数据
+
+## Turso 配好后的线上环境变量
+
+- `ADMIN_KEY`
+- `TURSO_DATABASE_URL`
+- `TURSO_AUTH_TOKEN`

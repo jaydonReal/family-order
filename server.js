@@ -1,16 +1,18 @@
 import express from "express";
+import { createClient } from "@libsql/client";
 import sqlite3 from "sqlite3";
 import { fileURLToPath } from "url";
 import fs from "fs";
 import path from "path";
-
-
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = parseInt(process.env.PORT || "3000", 10);
+const DB_FILE_PATH = path.join(__dirname, "family.db");
+const TURSO_DATABASE_URL = process.env.TURSO_DATABASE_URL || "";
+const TURSO_AUTH_TOKEN = process.env.TURSO_AUTH_TOKEN || "";
 
 // ====== 你可以改这里：菜单 + 管理端口令 ======
 const ADMIN_KEY = process.env.ADMIN_KEY || "123456"; // 厨房端查看/操作口令（建议改复杂点）
@@ -23,22 +25,149 @@ function loadMenuFromFile() {
   return menu;
 }
 
+function parseOrderRow(row) {
+  if (!row) return null;
+  return {
+    ...row,
+    id: Number(row.id),
+    items: JSON.parse(row.items_json || "[]")
+  };
+}
 
+function createSqliteRepo(dbFilePath) {
+  const db = new sqlite3.Database(dbFilePath);
 
-// ====== DB ======
-const db = new sqlite3.Database(path.join(__dirname, "family.db"));
-db.serialize(() => {
-  db.run(`
-    CREATE TABLE IF NOT EXISTS orders (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      created_at TEXT NOT NULL,
-      who TEXT NOT NULL,
-      items_json TEXT NOT NULL,
-      note TEXT,
-      status TEXT NOT NULL DEFAULT 'NEW'
-    )
-  `);
-});
+  const run = (sql, params = []) =>
+    new Promise((resolve, reject) => {
+      db.run(sql, params, function onRun(err) {
+        if (err) return reject(err);
+        resolve({ changes: this.changes, lastID: this.lastID });
+      });
+    });
+
+  const get = (sql, params = []) =>
+    new Promise((resolve, reject) => {
+      db.get(sql, params, (err, row) => {
+        if (err) return reject(err);
+        resolve(row || null);
+      });
+    });
+
+  const all = (sql, params = []) =>
+    new Promise((resolve, reject) => {
+      db.all(sql, params, (err, rows) => {
+        if (err) return reject(err);
+        resolve(rows || []);
+      });
+    });
+
+  return {
+    engine: "sqlite",
+    async init() {
+      await run(`
+        CREATE TABLE IF NOT EXISTS orders (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          created_at TEXT NOT NULL,
+          who TEXT NOT NULL,
+          items_json TEXT NOT NULL,
+          note TEXT,
+          status TEXT NOT NULL DEFAULT 'NEW'
+        )
+      `);
+    },
+    async createOrder(createdAt, who, itemsJson, note) {
+      const result = await run(
+        `INSERT INTO orders (created_at, who, items_json, note, status) VALUES (?, ?, ?, ?, 'NEW')`,
+        [createdAt, who, itemsJson, note]
+      );
+      return result.lastID;
+    },
+    async getLatestOrder() {
+      return get(`SELECT * FROM orders ORDER BY id DESC LIMIT 1`);
+    },
+    async listOrders(limit) {
+      return all(`SELECT * FROM orders ORDER BY id DESC LIMIT ?`, [limit]);
+    },
+    async updateOrderStatus(id, status) {
+      const result = await run(`UPDATE orders SET status=? WHERE id=?`, [status, id]);
+      return result.changes;
+    },
+    async deleteOrder(id) {
+      const result = await run(`DELETE FROM orders WHERE id=?`, [id]);
+      return result.changes;
+    },
+    async deleteDoneOrders() {
+      const result = await run(`DELETE FROM orders WHERE status='DONE'`);
+      return result.changes;
+    }
+  };
+}
+
+function createTursoRepo(databaseUrl, authToken) {
+  const client = createClient({
+    url: databaseUrl,
+    authToken: authToken || undefined
+  });
+
+  const execute = async (sql, args = []) => {
+    const result = await client.execute({ sql, args });
+    return result;
+  };
+
+  return {
+    engine: "turso",
+    async init() {
+      await execute(`
+        CREATE TABLE IF NOT EXISTS orders (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          created_at TEXT NOT NULL,
+          who TEXT NOT NULL,
+          items_json TEXT NOT NULL,
+          note TEXT,
+          status TEXT NOT NULL DEFAULT 'NEW'
+        )
+      `);
+    },
+    async createOrder(createdAt, who, itemsJson, note) {
+      const result = await execute(
+        `INSERT INTO orders (created_at, who, items_json, note, status)
+         VALUES (?, ?, ?, ?, 'NEW')
+         RETURNING id`,
+        [createdAt, who, itemsJson, note]
+      );
+      return Number(result.rows?.[0]?.id || 0);
+    },
+    async getLatestOrder() {
+      const result = await execute(`SELECT * FROM orders ORDER BY id DESC LIMIT 1`);
+      return result.rows?.[0] || null;
+    },
+    async listOrders(limit) {
+      const result = await execute(`SELECT * FROM orders ORDER BY id DESC LIMIT ?`, [limit]);
+      return result.rows || [];
+    },
+    async updateOrderStatus(id, status) {
+      const result = await execute(`UPDATE orders SET status=? WHERE id=?`, [status, id]);
+      return Number(result.rowsAffected || 0);
+    },
+    async deleteOrder(id) {
+      const result = await execute(`DELETE FROM orders WHERE id=?`, [id]);
+      return Number(result.rowsAffected || 0);
+    },
+    async deleteDoneOrders() {
+      const result = await execute(`DELETE FROM orders WHERE status='DONE'`);
+      return Number(result.rowsAffected || 0);
+    }
+  };
+}
+
+function createRepo() {
+  if (TURSO_DATABASE_URL) {
+    return createTursoRepo(TURSO_DATABASE_URL, TURSO_AUTH_TOKEN);
+  }
+  return createSqliteRepo(DB_FILE_PATH);
+}
+
+const repo = createRepo();
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
@@ -83,7 +212,7 @@ app.post("/api/admin/menu/reload", requireAdmin, (req, res) => {
 });
   
 
-app.post("/api/orders", (req, res) => {
+app.post("/api/orders", async (req, res) => {
   const { who, items, note } = req.body || {};
   if (!who || typeof who !== "string") return res.status(400).json({ error: "who required" });
   if (!Array.isArray(items) || items.length === 0) {
@@ -110,19 +239,13 @@ app.post("/api/orders", (req, res) => {
   
   const createdAt = new Date().toISOString();
   const itemsJson = JSON.stringify(normalized);
-
-
-  db.run(
-    `INSERT INTO orders (created_at, who, items_json, note, status) VALUES (?, ?, ?, ?, 'NEW')`,
-    [createdAt, who.trim(), itemsJson, (note || "").trim()],
-    function (err) {
-      if (err) return res.status(500).json({ error: "db insert failed" });
-    
-      sseSend({ type: "order_created", id: this.lastID });
-      res.json({ ok: true, id: this.lastID });
-    }
-    
-  );
+  try {
+    const id = await repo.createOrder(createdAt, who.trim(), itemsJson, (note || "").trim());
+    sseSend({ type: "order_created", id });
+    res.json({ ok: true, id });
+  } catch {
+    res.status(500).json({ error: "db insert failed" });
+  }
 });
 
 function requireAdmin(req, res, next) {
@@ -165,74 +288,79 @@ app.get("/api/stream", requireAdmin, (req, res) => {
 
   
 
-app.get("/api/orders/latest", requireAdmin, (req, res) => {
-  db.get(`SELECT * FROM orders ORDER BY id DESC LIMIT 1`, [], (err, row) => {
-    if (err) return res.status(500).json({ error: "db query failed" });
+app.get("/api/orders/latest", requireAdmin, async (req, res) => {
+  try {
+    const row = await repo.getLatestOrder();
     if (!row) return res.json({ order: null });
-    res.json({
-      order: {
-        ...row,
-        items: JSON.parse(row.items_json || "[]")
-      }
-    });
-  });
+    res.json({ order: parseOrderRow(row) });
+  } catch {
+    res.status(500).json({ error: "db query failed" });
+  }
 });
 
-app.get("/api/orders", requireAdmin, (req, res) => {
+app.get("/api/orders", requireAdmin, async (req, res) => {
   const limit = Math.min(parseInt(req.query.limit || "20", 10), 100);
-  db.all(`SELECT * FROM orders ORDER BY id DESC LIMIT ?`, [limit], (err, rows) => {
-    if (err) return res.status(500).json({ error: "db query failed" });
-    res.json({
-      orders: rows.map(r => ({ ...r, items: JSON.parse(r.items_json || "[]") }))
-    });
-  });
+  try {
+    const rows = await repo.listOrders(limit);
+    res.json({ orders: rows.map(parseOrderRow) });
+  } catch {
+    res.status(500).json({ error: "db query failed" });
+  }
 });
 
-app.post("/api/orders/:id/done", requireAdmin, (req, res) => {
+app.post("/api/orders/:id/done", requireAdmin, async (req, res) => {
   const id = parseInt(req.params.id, 10);
-  db.run(`UPDATE orders SET status='DONE' WHERE id=?`, [id], function (err) {
-    if (err) return res.status(500).json({ error: "db update failed" });
+  try {
+    const changed = await repo.updateOrderStatus(id, "DONE");
     sseSend({ type: "order_updated", id, status: "DONE" });
-    res.json({ ok: true, changed: this.changes });
-  });
+    res.json({ ok: true, changed });
+  } catch {
+    res.status(500).json({ error: "db update failed" });
+  }
 });
 
-app.post("/api/orders/:id/cooking", requireAdmin, (req, res) => {
+app.post("/api/orders/:id/cooking", requireAdmin, async (req, res) => {
   const id = parseInt(req.params.id, 10);
-  db.run(`UPDATE orders SET status='COOKING' WHERE id=?`, [id], function (err) {
-    if (err) return res.status(500).json({ error: "db update failed" });
+  try {
+    const changed = await repo.updateOrderStatus(id, "COOKING");
     sseSend({ type: "order_updated", id, status: "COOKING" });
-    res.json({ ok: true, changed: this.changes });
-  });
+    res.json({ ok: true, changed });
+  } catch {
+    res.status(500).json({ error: "db update failed" });
+  }
 });
 
 
 
 // 删除单条订单
-app.delete("/api/orders/:id", requireAdmin, (req, res) => {
+app.delete("/api/orders/:id", requireAdmin, async (req, res) => {
   const id = parseInt(req.params.id, 10);
-  db.run(`DELETE FROM orders WHERE id=?`, [id], function (err) {
-    if (err) return res.status(500).json({ error: "db delete failed" });
+  try {
+    const deleted = await repo.deleteOrder(id);
     sseSend({ type: "order_deleted", id });
-    res.json({ ok: true, deleted: this.changes });
-  });
+    res.json({ ok: true, deleted });
+  } catch {
+    res.status(500).json({ error: "db delete failed" });
+  }
 });
 
-app.delete("/api/orders", requireAdmin, (req, res) => {
+app.delete("/api/orders", requireAdmin, async (req, res) => {
   const status = String(req.query.status || "");
   if (status !== "DONE") return res.status(400).json({ error: "only support status=DONE" });
 
-  db.run(`DELETE FROM orders WHERE status='DONE'`, [], function (err) {
-    if (err) return res.status(500).json({ error: "db delete failed" });
-    sseSend({ type: "orders_cleared", status: "DONE", deleted: this.changes });
-    res.json({ ok: true, deleted: this.changes });
-  });
+  try {
+    const deleted = await repo.deleteDoneOrders();
+    sseSend({ type: "orders_cleared", status: "DONE", deleted });
+    res.json({ ok: true, deleted });
+  } catch {
+    res.status(500).json({ error: "db delete failed" });
+  }
 });
 
-
-  
+await repo.init();
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Family Order running: http://localhost:${PORT}`);
   console.log(`On LAN: http://<你的电脑IP>:${PORT}`);
+  console.log(`DB engine: ${repo.engine}`);
 });
