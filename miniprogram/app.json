@@ -1,0 +1,29 @@
+{
+  "pages": [
+    "pages/order/order",
+    "pages/admin/admin"
+  ],
+  "window": {
+    "navigationBarTitleText": "家庭点菜",
+    "navigationBarBackgroundColor": "#647b5d",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#f6f4ed"
+  },
+  "tabBar": {
+    "color": "#667467",
+    "selectedColor": "#556b4e",
+    "backgroundColor": "#fffdf8",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/order/order",
+        "text": "点菜"
+      },
+      {
+        "pagePath": "pages/admin/admin",
+        "text": "厨房"
+      }
+    ]
+  },
+  "sitemapLocation": "sitemap.json"
+}

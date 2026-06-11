@@ -1,0 +1,43 @@
+<view class="page">
+  <view class="hero">
+    <text class="title">厨房端</text>
+    <text class="sub">查看订单，切换制作状态。</text>
+  </view>
+
+  <view class="card">
+    <text class="label">管理员口令</text>
+    <input class="input" password value="{{adminKey}}" placeholder="Render 里的 ADMIN_KEY" bindinput="onKeyInput" />
+    <view class="actions-row">
+      <button class="primary" bindtap="saveKey">保存口令</button>
+      <button class="ghost" bindtap="loadOrders">刷新</button>
+    </view>
+  </view>
+
+  <view class="tabs">
+    <button class="tab {{filter === 'ALL' ? 'active' : ''}}" data-filter="ALL" bindtap="setFilter">全部</button>
+    <button class="tab {{filter === 'NEW' ? 'active' : ''}}" data-filter="NEW" bindtap="setFilter">NEW</button>
+    <button class="tab {{filter === 'COOKING' ? 'active' : ''}}" data-filter="COOKING" bindtap="setFilter">COOKING</button>
+    <button class="tab {{filter === 'DONE' ? 'active' : ''}}" data-filter="DONE" bindtap="setFilter">DONE</button>
+  </view>
+
+  <view class="orders">
+    <view wx:if="{{!visibleOrders.length}}" class="empty">暂无订单</view>
+    <view wx:for="{{visibleOrders}}" wx:key="id" class="order">
+      <view class="order-head">
+        <text class="order-id">#{{item.id}}</text>
+        <text class="status {{item.status}}">{{item.status}}</text>
+      </view>
+      <text class="line">点菜人：{{item.who}}</text>
+      <text class="line">时间：{{item.displayTime}}</text>
+      <view class="badges">
+        <text wx:for="{{item.items}}" wx:key="name" class="badge">{{item.name}} x{{item.qty || 1}}</text>
+      </view>
+      <text class="note">备注：{{item.note || "无"}}</text>
+      <view class="order-actions">
+        <button class="ghost" data-id="{{item.id}}" data-action="cooking" bindtap="updateStatus" disabled="{{item.status !== 'NEW'}}">开始做</button>
+        <button class="primary" data-id="{{item.id}}" data-action="done" bindtap="updateStatus" disabled="{{item.status === 'DONE'}}">完成</button>
+        <button class="danger" data-id="{{item.id}}" bindtap="deleteOrder">删除</button>
+      </view>
+    </view>
+  </view>
+</view>

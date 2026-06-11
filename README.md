@@ -46,6 +46,22 @@ npm run dev
 - Render：放网站
 - Turso：存订单数据
 
+## 微信小程序
+
+小程序客户端在 `miniprogram/` 目录。
+
+使用方式：
+
+1. 用微信开发者工具导入 `miniprogram/`
+2. 修改 `miniprogram/config.js` 里的 `apiBaseUrl`
+3. 把 Render 域名加入微信公众平台的 `request 合法域名`
+4. 编译运行
+
+小程序包含：
+
+- 点菜页
+- 厨房页
+
 ## Turso 配好后的线上环境变量
 
 - `ADMIN_KEY`

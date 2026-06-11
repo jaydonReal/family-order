@@ -1,0 +1,157 @@
+.page {
+  padding-bottom: 40rpx;
+}
+
+.hero {
+  padding: 44rpx 32rpx 18rpx;
+}
+
+.title {
+  display: block;
+  color: #243127;
+  font-size: 46rpx;
+  font-weight: 800;
+}
+
+.sub {
+  display: block;
+  margin-top: 8rpx;
+  color: #667467;
+  font-size: 26rpx;
+}
+
+.label {
+  display: block;
+  margin-bottom: 12rpx;
+  color: #556b4e;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1rpx solid rgba(74, 96, 76, 0.16);
+  border-radius: 16rpx;
+  background: #fff;
+  padding: 22rpx;
+  color: #243127;
+  font-size: 28rpx;
+}
+
+.actions-row,
+.order-actions {
+  display: flex;
+  gap: 14rpx;
+  margin-top: 18rpx;
+}
+
+.actions-row button,
+.order-actions button {
+  flex: 1;
+  margin: 0;
+  font-size: 26rpx;
+}
+
+.tabs {
+  display: flex;
+  gap: 12rpx;
+  padding: 0 24rpx 20rpx;
+}
+
+.tab {
+  flex: 1;
+  margin: 0;
+  padding: 12rpx 0;
+  border-radius: 999rpx;
+  background: #eef3e7;
+  color: #556b4e;
+  font-size: 24rpx;
+}
+
+.tab.active {
+  background: #647b5d;
+  color: #fffdf8;
+}
+
+.orders {
+  padding: 0 24rpx;
+}
+
+.empty {
+  padding: 80rpx 0;
+  color: #667467;
+  text-align: center;
+}
+
+.order {
+  margin-bottom: 18rpx;
+  padding: 24rpx;
+  border: 1rpx solid rgba(74, 96, 76, 0.12);
+  border-radius: 18rpx;
+  background: #fffdf8;
+  box-shadow: 0 10rpx 24rpx rgba(74, 61, 41, 0.05);
+}
+
+.order-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12rpx;
+}
+
+.order-id {
+  color: #243127;
+  font-size: 34rpx;
+  font-weight: 900;
+}
+
+.status {
+  border-radius: 999rpx;
+  padding: 6rpx 16rpx;
+  font-size: 22rpx;
+  font-weight: 800;
+}
+
+.status.NEW {
+  background: #fff1ea;
+  color: #b55d2f;
+}
+
+.status.COOKING {
+  background: #fff6d8;
+  color: #9d7b2a;
+}
+
+.status.DONE {
+  background: #eef3e7;
+  color: #4d7a54;
+}
+
+.line,
+.note {
+  display: block;
+  margin-top: 8rpx;
+  color: #667467;
+  font-size: 24rpx;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+  margin-top: 14rpx;
+}
+
+.badge {
+  border-radius: 999rpx;
+  background: #eef3e7;
+  padding: 6rpx 14rpx;
+  color: #556b4e;
+  font-size: 22rpx;
+}
+
+.danger {
+  background: #b55d2f;
+  color: #fff;
+}

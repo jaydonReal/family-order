@@ -1,0 +1,51 @@
+<view class="page">
+  <view class="hero">
+    <text class="eyebrow">Family Order</text>
+    <text class="title">今天想吃什么</text>
+    <text class="sub">选好菜，厨房端会立刻收到订单。</text>
+  </view>
+
+  <view class="card form-card">
+    <text class="label">点菜人</text>
+    <input class="input" value="{{who}}" placeholder="例如：小美 / 宝宝" bindinput="onWhoInput" />
+
+    <text class="label top-gap">搜索菜名</text>
+    <input class="input" value="{{query}}" placeholder="鸡 / 汤 / 辣..." bindinput="onQueryInput" />
+
+    <scroll-view class="tag-scroll" scroll-x>
+      <view class="tags">
+        <button class="tag {{activeTag === 'ALL' ? 'active' : ''}}" data-tag="ALL" bindtap="selectTag">全部</button>
+        <button wx:for="{{tags}}" wx:key="*this" class="tag {{activeTag === item ? 'active' : ''}}" data-tag="{{item}}" bindtap="selectTag">{{item}}</button>
+      </view>
+    </scroll-view>
+  </view>
+
+  <view class="menu">
+    <view wx:for="{{filteredMenu}}" wx:key="id" class="dish {{qtyMap[item.id] ? 'selected' : ''}}">
+      <view class="dish-main">
+        <text class="dish-name">{{item.name}}</text>
+        <view class="badges">
+          <text wx:for="{{item.tags}}" wx:key="*this" class="badge">{{item}}</text>
+        </view>
+      </view>
+      <view class="stepper">
+        <button class="round" data-id="{{item.id}}" data-delta="-1" bindtap="changeQty" disabled="{{!qtyMap[item.id]}}">-</button>
+        <text class="qty">{{qtyMap[item.id] || 0}}</text>
+        <button class="round" data-id="{{item.id}}" data-delta="1" bindtap="changeQty">+</button>
+      </view>
+    </view>
+  </view>
+
+  <view class="card">
+    <text class="label">备注</text>
+    <textarea class="textarea" value="{{note}}" placeholder="例如：少辣、不要香菜、想喝汤" bindinput="onNoteInput" />
+  </view>
+
+  <view class="summary">
+    <view>
+      <text class="summary-title">已选 {{totalKinds}} 种 · 共 {{totalQty}} 份</text>
+      <text class="summary-text">{{summaryText}}</text>
+    </view>
+    <button class="submit" loading="{{submitting}}" bindtap="submitOrder">提交</button>
+  </view>
+</view>
