@@ -14,23 +14,23 @@
 
     <scroll-view class="tag-scroll" scroll-x>
       <view class="tags">
-        <button class="tag {{activeTag === 'ALL' ? 'active' : ''}}" data-tag="ALL" bindtap="selectTag">全部</button>
-        <button wx:for="{{tags}}" wx:key="*this" class="tag {{activeTag === item ? 'active' : ''}}" data-tag="{{item}}" bindtap="selectTag">{{item}}</button>
+        <button class="tag {{allTagActiveClass}}" data-tag="ALL" bindtap="selectTag">全部</button>
+        <button wx:for="{{tags}}" wx:key="name" class="tag {{item.activeClass}}" data-tag="{{item.name}}" bindtap="selectTag">{{item.name}}</button>
       </view>
     </scroll-view>
   </view>
 
   <view class="menu">
-    <view wx:for="{{filteredMenu}}" wx:key="id" class="dish {{qtyMap[item.id] ? 'selected' : ''}}">
+    <view wx:for="{{filteredMenu}}" wx:key="id" class="dish {{item.selectedClass}}">
       <view class="dish-main">
         <text class="dish-name">{{item.name}}</text>
         <view class="badges">
-          <text wx:for="{{item.tags}}" wx:key="*this" class="badge">{{item}}</text>
+          <text wx:for="{{item.tags}}" wx:for-item="tag" wx:key="*this" class="badge">{{tag}}</text>
         </view>
       </view>
       <view class="stepper">
-        <button class="round" data-id="{{item.id}}" data-delta="-1" bindtap="changeQty" disabled="{{!qtyMap[item.id]}}">-</button>
-        <text class="qty">{{qtyMap[item.id] || 0}}</text>
+        <button class="round" data-id="{{item.id}}" data-delta="-1" bindtap="changeQty" disabled="{{item.decDisabled}}">-</button>
+        <text class="qty">{{item.qty}}</text>
         <button class="round" data-id="{{item.id}}" data-delta="1" bindtap="changeQty">+</button>
       </view>
     </view>

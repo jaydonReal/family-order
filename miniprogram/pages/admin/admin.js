@@ -5,7 +5,11 @@ Page({
     adminKey: "",
     orders: [],
     visibleOrders: [],
-    filter: "ALL"
+    filter: "ALL",
+    tabAllClass: "active",
+    tabNewClass: "",
+    tabCookingClass: "",
+    tabDoneClass: ""
   },
 
   onLoad() {
@@ -42,7 +46,14 @@ Page({
       const data = await request(`/api/orders?limit=50&key=${encodeURIComponent(key)}`);
       const orders = (data.orders || []).map((order) => ({
         ...order,
-        displayTime: new Date(order.created_at).toLocaleString()
+        displayTime: new Date(order.created_at).toLocaleString(),
+        displayItems: (order.items || []).map((dish) => ({
+          ...dish,
+          qty: Math.max(1, Number(dish.qty || 1))
+        })),
+        noteText: String(order.note || "").trim() || "无",
+        cookingDisabled: order.status !== "NEW",
+        doneDisabled: order.status === "DONE"
       }));
       this.setData({ orders }, () => this.applyFilter());
     } catch (err) {
@@ -57,7 +68,13 @@ Page({
     const visibleOrders = filter === "ALL"
       ? this.data.orders
       : this.data.orders.filter((order) => order.status === filter);
-    this.setData({ visibleOrders });
+    this.setData({
+      visibleOrders,
+      tabAllClass: filter === "ALL" ? "active" : "",
+      tabNewClass: filter === "NEW" ? "active" : "",
+      tabCookingClass: filter === "COOKING" ? "active" : "",
+      tabDoneClass: filter === "DONE" ? "active" : ""
+    });
   },
 
   async updateStatus(event) {

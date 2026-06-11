@@ -5,6 +5,7 @@ Page({
     menu: [],
     filteredMenu: [],
     tags: [],
+    allTagActiveClass: "active",
     activeTag: "ALL",
     query: "",
     who: "",
@@ -30,7 +31,9 @@ Page({
       menu.forEach((item) => (item.tags || []).forEach((tag) => tagSet.add(String(tag))));
       this.setData({
         menu,
-        tags: Array.from(tagSet).sort((a, b) => a.localeCompare(b, "zh-Hans-CN"))
+        tags: Array.from(tagSet)
+          .sort((a, b) => a.localeCompare(b, "zh-Hans-CN"))
+          .map((name) => ({ name, activeClass: "" }))
       });
       this.applyFilter();
     } catch (err) {
@@ -67,8 +70,24 @@ Page({
       const okQuery = tokens.length === 0 || tokens.every((token) => name.includes(token));
       const okTag = activeTag === "ALL" || (item.tags || []).map(String).includes(activeTag);
       return okQuery && okTag;
+    }).map((item) => {
+      const id = String(item.id);
+      const qty = Number(this.data.qtyMap[id] || 0);
+      return {
+        ...item,
+        qty,
+        decDisabled: qty <= 0,
+        selectedClass: qty > 0 ? "selected" : ""
+      };
     });
-    this.setData({ filteredMenu });
+    this.setData({
+      filteredMenu,
+      allTagActiveClass: activeTag === "ALL" ? "active" : "",
+      tags: this.data.tags.map((tag) => ({
+        ...tag,
+        activeClass: tag.name === activeTag ? "active" : ""
+      }))
+    });
   },
 
   changeQty(event) {
@@ -81,7 +100,10 @@ Page({
     } else {
       qtyMap[id] = next;
     }
-    this.setData({ qtyMap }, () => this.updateSummary());
+    this.setData({ qtyMap }, () => {
+      this.updateSummary();
+      this.applyFilter();
+    });
   },
 
   getChosenItems() {
